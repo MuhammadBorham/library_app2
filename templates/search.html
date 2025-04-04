@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results{% endblock %}
+
+{% block content %}
+<section class="py-5 my-5">
+    <div class="container">
+        <h2 class="section-title divider">Search Results for "{{ search_query }}"</h2>
+        
+        {% if books %}
+        <div class="row">
+            {% for book in books %}
+            <div class="col-md-3 mb-4">
+                <div class="product-item">
+                    <figure class="product-style">
+                        {% if book.image_filename %}
+                            <img src="{{ url_for('static', filename='uploads/books/' + book.image_filename) }}" alt="{{ book.title }}" class="product-item">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='images/placeholder-book.jpg') }}" alt="{{ book.title }}" class="product-item">
+                        {% endif %}
+                        <a href="{{ url_for('book_details', book_id=book.id) }}" class="add-to-cart">View Details</a>
+                    </figure>
+                    <figcaption>
+                        <h3>{{ book.title }}</h3>
+                        <span>by {{ book.author.name }}</span>
+                        <div class="availability mt-2">
+                            Available: {{ book.quantity - book.borrowed }}
+                        </div>
+                        <div class="actions mt-3">
+                            {% if book.quantity > book.borrowed %}
+                                <form method="POST" action="{{ url_for('borrow_book', book_id=book.id) }}">
+                                    <button type="submit" class="btn btn-sm btn-primary">Borrow</button>
+                                </form>
+                            {% endif %}
+                            
+                            {% if current_user.is_admin or book.borrowed_by.filter_by(user_id=current_user.id).first() %}
+                                <form method="POST" action="{{ url_for('return_book', book_id=book.id) }}" class="mt-2">
+                                    <button type="submit" class="btn btn-sm btn-secondary">Return</button>
+                                </form>
+                            {% endif %}
+                            
+                            {% if current_user.is_admin %}
+                                <form method="POST" action="{{ url_for('remove_book', book_id=book.id) }}" class="mt-2">
+                                    <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </figcaption>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            No books found matching your search.
+        </div>
+        {% endif %}
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}{{ author.name }}{% endblock %}
+
+{% block content %}
+<section class="py-5 my-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4">
+                <img src="{{ url_for('static', filename='images/author-placeholder.jpg') }}" alt="{{ author.name }}" class="img-fluid rounded">
+            </div>
+            <div class="col-md-8">
+                <h1 class="mb-3">{{ author.name }}</h1>
+                <div class="author-bio mb-4">
+                    <h4>Biography</h4>
+                    <p>{{ author.bio }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <h3 class="section-title divider">Books by {{ author.name }}</h3>
+                
+                <div class="row">
+                    {% for book in author.books %}
+                    <div class="col-md-3 mb-4">
+                        <div class="product-item">
+                            <figure class="product-style">
+                                {% if book.image_filename %}
+                                    <img src="{{ url_for('static', filename='uploads/books/' + book.image_filename) }}" alt="{{ book.title }}" class="product-item">
+                                {% else %}
+                                    <img src="{{ url_for('static', filename='images/placeholder-book.jpg') }}" alt="{{ book.title }}" class="product-item">
+                                {% endif %}
+                                <a href="{{ url_for('book_details', book_id=book.id) }}" class="add-to-cart">View Details</a>
+                            </figure>
+                            <figcaption>
+                                <h3>{{ book.title }}</h3>
+                                <div class="availability">
+                                    Available: {{ book.quantity - book.borrowed }}
+                                </div>
+                            </figcaption>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

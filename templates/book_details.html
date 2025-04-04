@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+<section id="book-details" class="py-5 my-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-5">
+                <figure class="product-style">
+                    {% if book.image_filename %}
+                        <img src="{{ url_for('static', filename='uploads/books/' + book.image_filename) }}" 
+                             alt="{{ book.title }}" 
+                             class="product-item">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/placeholder-book.jpg') }}" 
+                             alt="{{ book.title }}" 
+                             class="product-item">
+                    {% endif %}
+                    {% if current_user.is_authenticated and book.quantity > book.borrowed %}
+                        <form method="POST" action="{{ url_for('borrow_book', book_id=book.id) }}">
+                            <button type="submit" class="add-to-cart">Borrow This Book</button>
+                        </form>
+                    {% endif %}
+                </figure>
+            </div>
+            <div class="col-md-7">
+                <div class="product-entry">
+                    <h2 class="item-title">{{ book.title }}</h2>
+                    <div class="author-name">By {{ book.author.name }}</div>
+                    
+                    <div class="products-content">
+                        <p>{{ book.description or "No description available." }}</p>
+                        
+                        <div class="item-meta">
+                            <div class="availability">
+                                <span>Availability:</span>
+                                <span class="meta-value">
+                                    {% if book.quantity > book.borrowed %}
+                                        <span class="text-success">In Stock ({{ book.quantity - book.borrowed }} available)</span>
+                                    {% else %}
+                                        <span class="text-danger">Out of Stock</span>
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="total-copies">
+                                <span>Total Copies:</span>
+                                <span class="meta-value">{{ book.quantity }}</span>
+                            </div>
+                        </div>
+                        
+                        {% if not current_user.is_authenticated %}
+                            <div class="alert alert-light">
+                                <a href="{{ url_for('login') }}" class="btn-link">Login</a> to borrow this book
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Author Info Section -->
+        <div class="row mt-5">
+            <div class="col-md-12">
+                <div class="section-header">
+                    <h2 class="section-title divider">About the Author</h2>
+                </div>
+                
+                <div class="author-bio">
+                    <p>{{ author.bio or "No biography available for this author." }}</p>
+                    <div class="btn-wrap">
+                        <a href="{{ url_for('author_details', author_id=author.id) }}" class="btn-accent-arrow">
+                            View all books by {{ author.name }} <i class="icon icon-ns-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

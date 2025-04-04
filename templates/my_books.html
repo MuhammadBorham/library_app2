@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}My Borrowed Books{% endblock %}
+
+{% block content %}
+<section class="py-5 my-5">
+    <div class="container">
+        <h2 class="section-title divider">My Borrowed Books</h2>
+        
+        {% if borrowed_books %}
+        <div class="row">
+            {% for borrowed_book in borrowed_books %}
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ borrowed_book.book.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">by {{ borrowed_book.book.author.name }}</h6>
+                        
+                        <div class="book-info mt-3">
+                            <p><strong>Borrowed:</strong> {{ borrowed_book.borrowed_at.strftime('%Y-%m-%d') }}</p>
+                            <p><strong>Due Date:</strong> {{ borrowed_book.due_date.strftime('%Y-%m-%d') }}</p>
+                            
+                            {% if current_time > borrowed_book.due_date %}
+                                <p class="text-danger"><strong>Late!</strong> Penalty: ${{ ((current_time - borrowed_book.due_date).days * 0.05) | round(2) }}</p>
+                            {% endif %}
+                        </div>
+                        
+                        <form action="{{ url_for('return_book', book_id=borrowed_book.book.id) }}" method="POST">
+                            <button type="submit" class="btn btn-primary w-100">Return Book</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="alert alert-info">
+            You have not borrowed any books.
+        </div>
+        {% endif %}
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

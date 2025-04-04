@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Borrowed Books{% endblock %}
+
+{% block content %}
+<section class="py-5 my-5">
+    <div class="container">
+        <h2 class="section-title divider">Borrowed Books</h2>
+        
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Book</th>
+                        <th>Borrower</th>
+                        <th>Borrowed Date</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for book, borrowed_books in borrowed_books.items() %}
+                        {% for borrowed_book in borrowed_books %}
+                        <tr>
+                            <td>
+                                <a href="{{ url_for('book_details', book_id=book.id) }}">{{ book.title }}</a>
+                                <small class="text-muted d-block">by {{ book.author.name }}</small>
+                            </td>
+                            <td>
+                                <span class="username" onclick="toggleUserInfo('{{ borrowed_book.user.id }}', '{{ book.id }}')">
+                                    {{ borrowed_book.user.username }}
+                                </span>
+                                <div class="user-info" id="user-info-{{ borrowed_book.user.id }}-{{ book.id }}">
+                                    <small>Email: {{ borrowed_book.user.email }}</small><br>
+                                    <small>Phone: {{ borrowed_book.user.phone_number }}</small>
+                                </div>
+                            </td>
+                            <td>{{ borrowed_book.borrowed_at.strftime('%Y-%m-%d') }}</td>
+                            <td>{{ borrowed_book.due_date.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                {% if current_time > borrowed_book.due_date %}
+                                    <span class="badge bg-danger">Late</span>
+                                    <small class="d-block">Penalty: ${{ ((current_time - borrowed_book.due_date).days * 0.05) | round(2) }}</small>
+                                {% else %}
+                                    <span class="badge bg-success">On Time</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('return_book', book_id=book.id) }}" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-primary">Return</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="text-center mt-4">
+            <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</section>
+
+{% block scripts %}
+<script>
+    function toggleUserInfo(userId, bookId) {
+        const userInfoDiv = document.getElementById('user-info-' + userId + '-' + bookId);
+        userInfoDiv.classList.toggle('d-none');
+    }
+</script>
+{% endblock %}
+{% endblock %}

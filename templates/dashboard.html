@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<section id="featured-books" class="py-5 my-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12">
+                <h2 class="section-title">Welcome, {{ current_user.first_name }}</h2>
+                
+                <!-- Search Form -->
+                <form class="search-form mb-4" method="GET" action="{{ url_for('dashboard') }}">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search books..." value="{{ search_query }}">
+                        <button type="submit" class="btn btn-primary">Search</button>
+                    </div>
+                </form>
+
+                <!-- Book List -->
+                <div class="product-list">
+                    <div class="row">
+                        {% for book in books.items %}
+                        <div class="col-md-3 mb-4">
+                            <div class="product-item">
+                                <figure class="product-style">
+                                    {% if book.image_filename %}
+                                        <img src="{{ url_for('static', filename='uploads/books/' + book.image_filename) }}" alt="{{ book.title }}" class="product-item">
+                                    {% else %}
+                                        <img src="{{ url_for('static', filename='images/placeholder-book.jpg') }}" alt="{{ book.title }}" class="product-item">
+                                    {% endif %}
+                                    <a href="{{ url_for('book_details', book_id=book.id) }}" class="add-to-cart">View Details</a>
+                                </figure>
+                                <figcaption>
+                                    <h3>{{ book.title }}</h3>
+                                    <span>{{ book.author.name }}</span>
+                                    <div class="availability">
+                                        Available: {{ book.quantity - book.borrowed }}
+                                    </div>
+                                    <div class="actions mt-2">
+                                        {% if book.quantity > book.borrowed %}
+                                            <form method="POST" action="{{ url_for('borrow_book', book_id=book.id) }}">
+                                                <button type="submit" class="btn btn-sm btn-primary">Borrow</button>
+                                            </form>
+                                        {% endif %}
+                                        {% if current_user.is_admin %}
+                                            <form method="POST" action="{{ url_for('remove_book', book_id=book.id) }}" class="mt-2">
+                                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </figcaption>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="Page navigation">
+                    <ul class="pagination justify-content-center">
+                        {% if books.has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('dashboard', page=books.prev_num, search=search_query) }}">Previous</a>
+                            </li>
+                        {% endif %}
+                        {% if books.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('dashboard', page=books.next_num, search=search_query) }}">Next</a>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
