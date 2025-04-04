@@ -33,9 +33,6 @@ venv.bak/
 *.swp
 *.swo
 
-# Static files
-/static/uploads/
-
 # macOS
 .DS_Store
 
